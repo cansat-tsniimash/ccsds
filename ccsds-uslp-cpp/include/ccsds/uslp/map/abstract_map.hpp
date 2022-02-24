@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <functional>
 #include <vector>
+#include <optional>
 
 #include <ccsds/uslp/common/defs.hpp>
 #include <ccsds/uslp/common/ids.hpp>
