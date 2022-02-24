@@ -81,3 +81,6 @@ PROPERTIES
 	CXX_STANDARD_REQUIRED YES
 	CXX_EXTENSIONS NO
 )
+
+
+add_library(ccsds::uslp ALIAS ccsds-uslp)
