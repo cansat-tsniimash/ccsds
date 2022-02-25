@@ -20,6 +20,8 @@ namespace ccsds { namespace uslp {
 
 class mchannel_emitter;
 class mchannel_acceptor;
+class output_stack;
+class input_stack;
 
 
 struct pchannel_frame_params_t
@@ -42,10 +44,10 @@ struct pchannel_frame_params_t
 class pchannel_emitter
 {
 public:
-	typedef std::function<void(const emitter_event &)> event_callback_t;
-
-	pchannel_emitter(std::string name_);
+	pchannel_emitter(output_stack * stack, std::string name_);
 	virtual ~pchannel_emitter() = default;
+
+	output_stack & stack() { return *_stack; }
 
 	void frame_version_no(uint8_t value);
 	uint8_t frame_version_no() const noexcept { return _frame_version_no; }
@@ -55,8 +57,6 @@ public:
 
 	void error_control_len(error_control_len_t value);
 	error_control_len_t error_control_len() const noexcept { return _error_control_len; }
-
-	void set_event_callback(event_callback_t event_callback);
 
 	void add_mchannel_source(mchannel_emitter * source);
 
@@ -81,7 +81,7 @@ protected:
 	virtual void pop_impl(uint8_t * frame_buffer) = 0;
 
 private:
-	event_callback_t _event_callback;
+	output_stack * _stack;
 	uint8_t _frame_version_no;
 	bool _finalized = false;
 	size_t _frame_size = 0;
@@ -92,18 +92,16 @@ private:
 class pchannel_acceptor
 {
 public:
-	typedef std::function<void(const acceptor_event &)> event_callback_t;
-
-	pchannel_acceptor(std::string name_);
+	pchannel_acceptor(input_stack * stack, std::string name_);
 	virtual ~pchannel_acceptor() = default;
+
+	input_stack & stack() { return *_stack; }
 
 	void insert_zone_size(uint16_t value);
 	uint16_t insert_zone_size() const noexcept { return _insert_zone_size; }
 
 	void error_control_len(error_control_len_t value);
 	error_control_len_t error_control_len() const noexcept { return _error_control_len; }
-
-	void set_event_callback(event_callback_t event_callback);
 
 	void add_mchannel_acceptor(mchannel_acceptor * sink);
 
@@ -121,7 +119,7 @@ protected:
 	virtual void push_frame_impl(const uint8_t * frame_buffer, size_t frame_buffer_size) = 0;
 
 private:
-	event_callback_t _event_callback;
+	input_stack * _stack;
 	bool _finalized = false;
 	uint16_t _insert_zone_size = 0;
 	error_control_len_t _error_control_len = error_control_len_t::ZERO;

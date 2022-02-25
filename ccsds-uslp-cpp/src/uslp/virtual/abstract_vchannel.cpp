@@ -3,6 +3,9 @@
 #include <sstream>
 #include <cassert>
 
+#include <ccsds/uslp/output_stack.hpp>
+#include <ccsds/uslp/input_stack.hpp>
+
 #include <ccsds/uslp/exceptions.hpp>
 #include <ccsds/uslp/_detail/tf_header.hpp>
 #include <ccsds/uslp/map/abstract_map.hpp>
@@ -11,17 +14,10 @@
 namespace ccsds { namespace uslp {
 
 
-template<typename T>
-static void _default_event_callback(const T &)
+vchannel_emitter::vchannel_emitter(output_stack * stack, gvcid_t gvcid_)
+	: channel_id(gvcid_), _stack(stack)
 {
 
-}
-
-
-vchannel_emitter::vchannel_emitter(gvcid_t gvcid_)
-	: channel_id(gvcid_)
-{
-	set_event_callback(_default_event_callback<emitter_event>);
 }
 
 
@@ -48,19 +44,6 @@ void vchannel_emitter::frame_seq_no_len(uint8_t len)
 	}
 
 	_frame_seq_no.value(0, len);
-}
-
-
-void vchannel_emitter::set_event_callback(event_callback_t callback)
-{
-	if (_finalized)
-	{
-		std::stringstream error;
-		error << "unable to use set_event_callback on vchannel, because it is finalized";
-		throw object_is_finalized(error.str());
-	}
-
-	_event_callback = std::move(callback);
 }
 
 
@@ -171,7 +154,7 @@ uint16_t vchannel_emitter::frame_size_overhead() const
 
 void vchannel_emitter::emit_event(const emitter_event & evt)
 {
-	_event_callback(evt);
+	_stack->dispatch_event(evt);
 }
 
 
@@ -192,23 +175,10 @@ void vchannel_emitter::finalize_impl()
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
-vchannel_acceptor::vchannel_acceptor(gvcid_t gvcid_)
-	: channel_id(gvcid_)
+vchannel_acceptor::vchannel_acceptor(input_stack * stack, gvcid_t gvcid_)
+	: channel_id(gvcid_), _stack(stack)
 {
-	set_event_callback(_default_event_callback<acceptor_event>);
-}
 
-
-void vchannel_acceptor::set_event_callback(event_callback_t event_callback)
-{
-	if (_finalized)
-	{
-		std::stringstream error;
-		error << "unable to use set_event_callbck() on vchannel sink, because it is finalized";
-		throw object_is_finalized(error.str());
-	}
-
-	_event_callback = std::move(event_callback);
 }
 
 
@@ -253,7 +223,7 @@ void vchannel_acceptor::finalize()
 
 void vchannel_acceptor::finalize_impl()
 {
-	// Ничего пока не делаем. Чую тут будут танцы с фармом
+	// Ничего пока не делаем. Чую тут будут танцы с фрамом
 }
 
 
@@ -275,7 +245,7 @@ void vchannel_acceptor::push(
 
 void vchannel_acceptor::emit_event(const acceptor_event & evt)
 {
-	_event_callback(evt);
+	_stack->dispatch_event(evt);
 }
 
 

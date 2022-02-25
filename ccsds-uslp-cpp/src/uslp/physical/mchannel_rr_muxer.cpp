@@ -9,8 +9,8 @@
 namespace ccsds { namespace uslp {
 
 
-mchannel_rr_muxer::mchannel_rr_muxer(std::string name_)
-	: pchannel_emitter(std::move(name_))
+mchannel_rr_muxer::mchannel_rr_muxer(output_stack * stack, std::string name_)
+	: pchannel_emitter(stack, std::move(name_))
 {
 
 }

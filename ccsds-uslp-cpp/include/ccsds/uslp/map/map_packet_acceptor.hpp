@@ -11,11 +11,12 @@
 
 namespace ccsds { namespace uslp {
 
-class map_packet_sink: public map_acceptor
+
+class map_packet_acceptor: public map_acceptor
 {
 public:
-	map_packet_sink(gmapid_t channel_id);
-	virtual ~map_packet_sink() = default;
+	map_packet_acceptor(input_stack * stack, gmapid_t channel_id);
+	virtual ~map_packet_acceptor() = default;
 
 	void max_packet_size(size_t value);
 	size_t max_packet_size() const { return _max_packet_size; }

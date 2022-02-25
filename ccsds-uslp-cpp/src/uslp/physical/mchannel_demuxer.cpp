@@ -5,8 +5,8 @@
 namespace ccsds { namespace uslp {
 
 
-mchannel_demuxer::mchannel_demuxer(std::string name_)
-		: pchannel_acceptor(std::move(name_))
+mchannel_demuxer::mchannel_demuxer(input_stack * stack, std::string name_)
+		: pchannel_acceptor(stack, std::move(name_))
 {
 
 }

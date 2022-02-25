@@ -19,6 +19,8 @@ namespace ccsds { namespace uslp {
 
 class vchannel_emitter;
 class vchannel_acceptor;
+class output_stack;
+class input_stack;
 
 
 class ocf_source
@@ -57,18 +59,16 @@ struct mchannel_frame_params_t
 class mchannel_emitter
 {
 public:
-	typedef std::function<void(const emitter_event &)> event_callback_t;
-
-	mchannel_emitter(mcid_t mcid_);
+	mchannel_emitter(output_stack * stack, mcid_t mcid_);
 	virtual ~mchannel_emitter() = default;
+
+	output_stack & stack() { return *_stack; }
 
 	void frame_du_size_l1(uint16_t value);
 	uint16_t frame_du_size_l1() const { return _frame_size_l1; }
 
 	void id_is_destination(bool value);
 	bool id_is_destination() const noexcept { return _id_is_destination; }
-
-	void set_event_callback(event_callback_t event_callback);
 
 	void add_vchannel_source(vchannel_emitter * source);
 	void set_ocf_source(ocf_source * source);
@@ -96,7 +96,7 @@ protected:
 	virtual void pop_frame_du_impl(uint8_t * frame_data_unit_buffer) = 0;
 
 private:
-	event_callback_t _event_callback;
+	output_stack * _stack;
 	ocf_source * _ocf_source = nullptr;
 	bool _finalized = false;
 	bool _id_is_destination = true;
@@ -107,13 +107,12 @@ private:
 class mchannel_acceptor
 {
 public:
-	typedef std::function<void(const acceptor_event &)> event_callback_t;
-
-	mchannel_acceptor(mcid_t mcid_);
+	mchannel_acceptor(input_stack * stack, mcid_t mcid_);
 	virtual ~mchannel_acceptor() = default;
 
+	input_stack & stack() { return *_stack; }
+
 	void add_vchannel_acceptor(vchannel_acceptor * sink);
-	void set_event_callback(event_callback_t event_callback);
 	void set_ocf_sink(ocf_sink * sink);
 
 	void finalize();
@@ -138,7 +137,7 @@ protected:
 	) = 0;
 
 private:
-	event_callback_t _event_callback;
+	input_stack * _stack;
 	bool _finalized = false;
 	ocf_sink * _ocf_sink = nullptr;
 };

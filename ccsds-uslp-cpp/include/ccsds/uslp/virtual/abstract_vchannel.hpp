@@ -18,6 +18,9 @@ namespace ccsds { namespace uslp {
 
 class map_emitter;
 class map_acceptor;
+class output_stack;
+class input_stack;
+
 
 
 struct vchannel_frame_params
@@ -33,18 +36,16 @@ struct vchannel_frame_params
 class vchannel_emitter
 {
 public:
-	typedef std::function<void(const emitter_event &)> event_callback_t;
-
-	vchannel_emitter(gvcid_t gvcid_);
+	vchannel_emitter(output_stack * stack, gvcid_t gvcid_);
 	virtual ~vchannel_emitter() = default;
+
+	output_stack & stack() { return *_stack; }
 
 	void tfdf_size(uint16_t value);
 	uint16_t tfdf_size() const noexcept { return _frame_size_l2; }
 
 	void frame_seq_no_len(uint8_t value);
 	uint8_t frame_seq_no_len() const noexcept { return _frame_seq_no.value_size(); }
-
-	void set_event_callback(event_callback_t callback);
 
 	void add_map_source(map_emitter * source);
 
@@ -73,7 +74,7 @@ protected:
 	void emit_event(const emitter_event & evt);
 
 private:
-	event_callback_t _event_callback;
+	output_stack * _stack;
 	bool _finalized = false;
 	frame_seq_no_t _frame_seq_no;
 	uint16_t _frame_size_l2 = 0;
@@ -83,12 +84,10 @@ private:
 class vchannel_acceptor
 {
 public:
-	typedef std::function<void(const acceptor_event &)> event_callback_t;
-
-	vchannel_acceptor(gvcid_t gvcid_);
+	vchannel_acceptor(input_stack * stack, gvcid_t gvcid_);
 	virtual ~vchannel_acceptor() = default;
 
-	void set_event_callback(event_callback_t callback);
+	input_stack & stack() { return *_stack; }
 
 	void add_map_accceptor(map_acceptor * acceptor);
 
@@ -114,7 +113,7 @@ protected:
 	) = 0;
 
 private:
-	event_callback_t _event_callback;
+	input_stack * _stack;
 	bool _finalized = false;
 };
 

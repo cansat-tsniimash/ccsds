@@ -14,7 +14,7 @@ namespace ccsds { namespace uslp {
 class vchannel_demuxer: public mchannel_acceptor
 {
 public:
-	vchannel_demuxer(mcid_t mcid_);
+	vchannel_demuxer(input_stack * stack, mcid_t mcid_);
 	virtual ~vchannel_demuxer() = default;
 
 protected:

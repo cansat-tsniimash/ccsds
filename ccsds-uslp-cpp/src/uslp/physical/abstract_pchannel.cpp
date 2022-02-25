@@ -3,6 +3,9 @@
 #include <sstream>
 #include <cassert>
 
+#include <ccsds/uslp/output_stack.hpp>
+#include <ccsds/uslp/input_stack.hpp>
+
 #include <ccsds/uslp/_detail/tf_header.hpp>
 #include <ccsds/uslp/exceptions.hpp>
 
@@ -10,18 +13,11 @@
 namespace ccsds { namespace uslp {
 
 
-template<typename T>
-static void _default_event_callback(const T &)
+pchannel_emitter::pchannel_emitter(output_stack * stack, std::string name_)
+		: channel_id(name_),
+		  _frame_version_no(detail::tf_header_t::default_frame_version_no),
+		  _stack(stack)
 {
-
-}
-
-
-
-pchannel_emitter::pchannel_emitter(std::string name_)
-		: channel_id(name_), _frame_version_no(detail::tf_header_t::default_frame_version_no)
-{
-	set_event_callback(_default_event_callback<emitter_event>);
 }
 
 
@@ -69,19 +65,6 @@ void pchannel_emitter::error_control_len(error_control_len_t value)
 	}
 
 	_error_control_len = value;
-}
-
-
-void pchannel_emitter::set_event_callback(event_callback_t event_callback)
-{
-	if (_finalized)
-	{
-		std::stringstream error;
-		error << "unable to use set_event_callback() on pchannel source because pchannel is finalized";
-		throw object_is_finalized(error.str());
-	}
-
-	_event_callback = std::move(event_callback);
 }
 
 
@@ -190,7 +173,7 @@ uint16_t pchannel_emitter::frame_size_overhead() const
 
 void pchannel_emitter::emit_event(const emitter_event & evt)
 {
-	_event_callback(evt);
+	_stack->dispatch_event(evt);
 }
 
 
@@ -218,10 +201,10 @@ void pchannel_emitter::finalize_impl()
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-pchannel_acceptor::pchannel_acceptor(std::string name_)
-	: channel_id(std::move(name_))
+pchannel_acceptor::pchannel_acceptor(input_stack * stack, std::string name_)
+	: channel_id(std::move(name_)), _stack(stack)
 {
-	set_event_callback(_default_event_callback<acceptor_event>);
+
 }
 
 
@@ -248,19 +231,6 @@ void pchannel_acceptor::error_control_len(error_control_len_t value)
 	}
 
 	_error_control_len = value;
-}
-
-
-void pchannel_acceptor::set_event_callback(event_callback_t event_callback)
-{
-	if (_finalized)
-	{
-		std::stringstream error;
-		error << "unable to use set_event_callback() on pchannel sink because it is finalized";
-		throw object_is_finalized(error.str());
-	}
-
-	_event_callback = std::move(event_callback);
 }
 
 
@@ -302,7 +272,7 @@ void pchannel_acceptor::push_frame(const uint8_t * frame_buffer, size_t frame_bu
 
 void pchannel_acceptor::emit_event(const acceptor_event & evt)
 {
-	_event_callback(evt);
+	_stack->dispatch_event(evt);
 }
 
 

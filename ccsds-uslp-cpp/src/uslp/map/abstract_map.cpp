@@ -3,23 +3,19 @@
 #include <sstream>
 #include <cassert>
 
+#include <ccsds/uslp/output_stack.hpp>
+#include <ccsds/uslp/input_stack.hpp>
+
 #include <ccsds/uslp/exceptions.hpp>
 
 
 namespace ccsds { namespace uslp {
 
 
-template<typename T>
-static void _default_event_callback(const T &)
+map_emitter::map_emitter(output_stack * stack, gmapid_t map_id_)
+	: channel_id(map_id_), _stack(stack)
 {
 
-}
-
-
-map_emitter::map_emitter(gmapid_t map_id_)
-	: channel_id(map_id_)
-{
-	set_event_callback(_default_event_callback<emitter_event>);
 }
 
 
@@ -33,19 +29,6 @@ void map_emitter::tfdf_size(uint16_t value)
 	}
 
 	_tfdf_size = value;
-}
-
-
-void map_emitter::set_event_callback(event_callback_t event_callback)
-{
-	if (_finalized)
-	{
-		std::stringstream error;
-		error << "unable to use set_event_callback() on map source, because it is finalized";
-		throw object_is_finalized(error.str());
-	}
-
-	_event_callback = std::move(event_callback);
 }
 
 
@@ -108,7 +91,7 @@ void map_emitter::finalize_impl()
 
 void map_emitter::emit_event(const emitter_event & event)
 {
-	_event_callback(event);
+	_stack->dispatch_event(event);
 }
 
 
@@ -116,23 +99,10 @@ void map_emitter::emit_event(const emitter_event & event)
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
-map_acceptor::map_acceptor(gmapid_t map_id_)
-	: channel_id(map_id_)
+map_acceptor::map_acceptor(input_stack * stack, gmapid_t map_id_)
+	: channel_id(map_id_), _stack(stack)
 {
-	set_event_callback(_default_event_callback<acceptor_event>);
-}
 
-
-void map_acceptor::set_event_callback(event_callback_t event_callback)
-{
-	if (_finalized)
-	{
-		std::stringstream error;
-		error << "unable to use set_event_callback() on map sink, because it is finalized";
-		throw object_is_finalized(error.str());
-	}
-
-	_event_callback = std::move(event_callback);
 }
 
 
@@ -164,7 +134,7 @@ void map_acceptor::push(
 
 void map_acceptor::emit_event(const acceptor_event & event)
 {
-	_event_callback(event);
+	_stack->dispatch_event(event);
 }
 
 

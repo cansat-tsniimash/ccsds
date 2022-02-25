@@ -50,12 +50,9 @@ public:
 	template<typename T, typename... ARGS>
 	T * create_pchannel(std::string name, ARGS && ...args);
 
+	void dispatch_event(const emitter_event & event);
+
 private:
-	template <typename T>
-	void _register_callbacks(T * sink);
-
-	void _event_callback(const emitter_event & evt);
-
 	output_stack_event_handler * _event_handler;
 
 	std::map<gmapid_t, std::unique_ptr<map_emitter>> _maps;
@@ -77,11 +74,10 @@ T * output_stack::create_map(gmapid_t mapid, ARGS && ...args)
 	}
 
 	std::unique_ptr<T> map(new T(
-			std::move(mapid), std::forward<ARGS>(args)...
+			this, std::move(mapid), std::forward<ARGS>(args)...
 	));
 
 	auto * retval = map.get();
-	_register_callbacks(retval);
 	itt->second->add_map_source(retval);
 	_maps.emplace(mapid, std::move(map));
 	return retval;
@@ -100,11 +96,10 @@ T * output_stack::create_vchannel(gvcid_t gvcid, ARGS && ...args)
 	}
 
 	std::unique_ptr<T> vchannel(new T(
-			std::move(gvcid), std::forward<ARGS>(args)...
+			this, std::move(gvcid), std::forward<ARGS>(args)...
 	));
 
 	auto * retval = vchannel.get();
-	_register_callbacks(retval);
 	itt->second->add_vchannel_source(retval);
 	_virtuals.emplace(gvcid, std::move(vchannel));
 	return retval;
@@ -118,11 +113,10 @@ T * output_stack::create_mchannel(mcid_t mcid, ARGS && ...args)
 		throw std::logic_error("pchannel source should be created before mchannel sources in output stack");
 
 	std::unique_ptr<T> mchannel(new T(
-			std::move(mcid), std::forward<ARGS>(args)...
+			this, std::move(mcid), std::forward<ARGS>(args)...
 	));
 
 	auto * retval = mchannel.get();
-	_register_callbacks(retval);
 	_pchannel->add_mchannel_source(retval);
 	_masters.emplace(mcid, std::move(mchannel));
 	return retval;
@@ -135,18 +129,9 @@ T * output_stack::create_pchannel(std::string name, ARGS && ...args)
 	if (_pchannel)
 		throw std::logic_error("unable to create second pchannel in output stack");
 
-	auto * retval = new T(std::move(name), std::forward<ARGS>(args)...);
-	_register_callbacks(retval);
+	auto * retval = new T(this, std::move(name), std::forward<ARGS>(args)...);
 	_pchannel.reset(retval);
 	return retval;
-}
-
-
-template <typename T>
-void output_stack::_register_callbacks(T * sink)
-{
-	auto callback = [this](const emitter_event & evt){ this->_event_callback(evt); };
-	sink->set_event_callback(std::move(callback));
 }
 
 

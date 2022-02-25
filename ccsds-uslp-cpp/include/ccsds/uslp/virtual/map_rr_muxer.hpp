@@ -12,7 +12,7 @@ namespace ccsds { namespace uslp {
 class map_rr_muxer: public vchannel_emitter
 {
 public:
-	map_rr_muxer(gvcid_t gvcid_);
+	map_rr_muxer(output_stack * stack, gvcid_t gvcid_);
 
 protected:
 	virtual void add_map_emitter_impl(map_emitter * emitter) override;

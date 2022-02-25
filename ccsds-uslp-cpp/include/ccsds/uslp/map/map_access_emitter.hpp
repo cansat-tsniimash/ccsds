@@ -16,7 +16,7 @@ namespace ccsds { namespace uslp {
 class map_access_emitter: public map_emitter
 {
 public:
-	map_access_emitter(gmapid_t map_id_);
+	map_access_emitter(output_stack * stack, gmapid_t map_id_);
 	virtual ~map_access_emitter() = default;
 
 	void add_sdu(payload_cookie_t cookie, const uint8_t * data, size_t data_size, qos_t qos);

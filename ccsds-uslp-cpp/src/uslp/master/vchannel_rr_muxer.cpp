@@ -5,8 +5,8 @@
 namespace ccsds { namespace uslp {
 
 
-vchannel_rr_muxer::vchannel_rr_muxer(mcid_t mcid_)
-		: mchannel_emitter(mcid_)
+vchannel_rr_muxer::vchannel_rr_muxer(output_stack * stack, mcid_t mcid_)
+		: mchannel_emitter(stack, mcid_)
 {
 
 }

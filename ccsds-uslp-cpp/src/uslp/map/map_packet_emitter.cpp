@@ -13,8 +13,8 @@
 namespace ccsds { namespace uslp {
 
 
-map_packet_emitter::map_packet_emitter(gmapid_t map_id_)
-	: map_emitter(map_id_)
+map_packet_emitter::map_packet_emitter(output_stack * stack, gmapid_t map_id_)
+	: map_emitter(stack, map_id_)
 {
 
 }

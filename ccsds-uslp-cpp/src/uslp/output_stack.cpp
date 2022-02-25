@@ -44,12 +44,12 @@ void output_stack::pop_frame(uint8_t * frame_buffer, size_t frame_buffer_size)
 }
 
 
-void output_stack::_event_callback(const emitter_event & evt)
+void output_stack::dispatch_event(const emitter_event & event)
 {
-	switch(evt.kind)
+	switch(event.kind)
 	{
 	case emitter_event::kind_t::SDU_EMITTED:
-		_event_handler->on_frame_emitted(dynamic_cast<const emitter_event_sdu_emitted&>(evt));
+		_event_handler->on_frame_emitted(dynamic_cast<const emitter_event_sdu_emitted&>(event));
 		break;
 
 	default:

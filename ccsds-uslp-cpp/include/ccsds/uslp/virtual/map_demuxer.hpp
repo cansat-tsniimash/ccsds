@@ -12,7 +12,7 @@ namespace ccsds { namespace uslp {
 class map_demuxer: public vchannel_acceptor
 {
 public:
-	map_demuxer(gvcid_t gvcid_);
+	map_demuxer(input_stack * stack, gvcid_t gvcid_);
 	virtual ~map_demuxer() = default;
 
 protected:
@@ -30,6 +30,7 @@ protected:
 private:
 	container_t _container;
 };
+
 
 }}
 

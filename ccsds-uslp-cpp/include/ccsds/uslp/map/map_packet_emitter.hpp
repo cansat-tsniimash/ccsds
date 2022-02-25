@@ -18,7 +18,7 @@ namespace ccsds { namespace uslp {
 class map_packet_emitter: public map_emitter
 {
 public:
-	map_packet_emitter(gmapid_t map_id_);
+	map_packet_emitter(output_stack * stack, gmapid_t map_id_);
 	virtual ~map_packet_emitter() = default;
 
 	void add_packet(

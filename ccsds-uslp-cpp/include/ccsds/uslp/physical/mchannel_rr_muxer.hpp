@@ -10,10 +10,13 @@
 namespace ccsds { namespace uslp {
 
 
+class output_stack;
+
+
 class mchannel_rr_muxer: public pchannel_emitter
 {
 public:
-	mchannel_rr_muxer(std::string name);
+	mchannel_rr_muxer(output_stack * stack, std::string name);
 	virtual ~mchannel_rr_muxer() = default;
 
 protected:

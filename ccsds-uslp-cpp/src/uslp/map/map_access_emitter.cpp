@@ -10,8 +10,8 @@
 namespace ccsds { namespace uslp {
 
 
-map_access_emitter::map_access_emitter(gmapid_t map_id_)
-	: map_emitter(map_id_)
+map_access_emitter::map_access_emitter(output_stack * stack, gmapid_t map_id_)
+	: map_emitter(stack, map_id_)
 {
 
 }

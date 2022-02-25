@@ -13,7 +13,7 @@ namespace ccsds { namespace uslp {
 class vchannel_rr_muxer: public mchannel_emitter
 {
 public:
-	vchannel_rr_muxer(mcid_t mcid_);
+	vchannel_rr_muxer(output_stack * stack, mcid_t mcid_);
 	virtual ~vchannel_rr_muxer() = default;
 
 protected:

@@ -47,12 +47,9 @@ public:
 	template<typename T, typename... ARGS>
 	T * create_pchannel(std::string name, ARGS && ...args);
 
+	void dispatch_event(const acceptor_event & event);
+
 private:
-	template<typename T>
-	void _register_events(T * sink);
-
-	void _event_callback(const acceptor_event & evt);
-
 	input_stack_event_handler * _event_handler;
 
 	std::map<gmapid_t, std::unique_ptr<map_acceptor>> _maps;
@@ -60,16 +57,6 @@ private:
 	std::map<mcid_t, std::unique_ptr<mchannel_acceptor>> _masters;
 	std::unique_ptr<pchannel_acceptor> _pchannel;
 };
-
-
-template<typename T>
-//typename std::enable_if<std::is_base_of<map_sink, T>::value, void>::type
-// Просто чертова шаблонная магия. Удалось обойтись без enable_if!
-void input_stack::_register_events(T * sink)
-{
-	auto callback = [this](const acceptor_event & evt) { this->_event_callback(evt); };
-	sink->set_event_callback(std::move(callback));
-}
 
 
 template<typename T, typename... ARGS>
@@ -84,13 +71,12 @@ T * input_stack::create_map(gmapid_t mapid, ARGS && ...args)
 	}
 
 	std::unique_ptr<T> map(new T(
-			std::move(mapid), std::forward<ARGS>(args)...
+			this, std::move(mapid), std::forward<ARGS>(args)...
 	));
 
 	auto * retval = map.get();
 	itt->second->add_map_accceptor(retval);
 	_maps.emplace(mapid, std::move(map));
-	_register_events(retval);
 	return retval;
 }
 
@@ -107,13 +93,12 @@ T * input_stack::create_vchannel(gvcid_t gvcid, ARGS && ...args)
 	}
 
 	std::unique_ptr<T> vchannel(new T(
-			std::move(gvcid), std::forward<ARGS>(args)...
+			this, std::move(gvcid), std::forward<ARGS>(args)...
 	));
 
 	auto * retval = vchannel.get();
 	itt->second->add_vchannel_acceptor(retval);
 	_virtuals.emplace(gvcid, std::move(vchannel));
-	_register_events(retval);
 	return retval;
 }
 
@@ -125,13 +110,12 @@ T * input_stack::create_mchannel(mcid_t mcid, ARGS && ...args)
 		throw std::logic_error("pchannel sink should be created before mchannel sinks in input stack");
 
 	std::unique_ptr<T> mchannel(new T(
-			std::move(mcid), std::forward<ARGS>(args)...
+			this, std::move(mcid), std::forward<ARGS>(args)...
 	));
 
 	auto * retval = mchannel.get();
 	_pchannel->add_mchannel_acceptor(retval);
 	_masters.emplace(mcid, std::move(mchannel));
-	_register_events(retval);
 	return retval;
 }
 
@@ -142,9 +126,8 @@ T * input_stack::create_pchannel(std::string name, ARGS && ...args)
 	if (_pchannel)
 		throw std::logic_error("unable to create second pchannel sink in input stack");
 
-	auto * retval = new T(std::move(name), std::forward<ARGS>(args)...);
+	auto * retval = new T(this, std::move(name), std::forward<ARGS>(args)...);
 	_pchannel.reset(retval);
-	_register_events(retval);
 	return retval;
 }
 

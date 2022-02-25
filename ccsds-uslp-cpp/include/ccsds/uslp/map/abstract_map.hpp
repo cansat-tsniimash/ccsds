@@ -16,6 +16,10 @@
 namespace ccsds { namespace uslp {
 
 
+class output_stack;
+class input_stack;
+
+
 //! Параметры пейлоада, отправляемого этим map каналом
 struct output_map_frame_params
 {
@@ -31,12 +35,10 @@ struct output_map_frame_params
 class map_emitter
 {
 public:
-	typedef std::function<void(const emitter_event &)> event_callback_t;
-
-	map_emitter(gmapid_t map_id_);
+	map_emitter(output_stack * stack, gmapid_t map_id_);
 	virtual ~map_emitter() = default;
 
-	void set_event_callback(event_callback_t event_callback);
+	output_stack & stack() { return *_stack; }
 
 	void tfdf_size(uint16_t value);
 	uint16_t tfdf_size() const noexcept { return _tfdf_size; }
@@ -59,7 +61,7 @@ protected:
 	virtual void pop_tfdf_impl(uint8_t * tfdf_buffer) = 0;
 
 private:
-	event_callback_t _event_callback = nullptr;
+	output_stack * _stack;
 	bool _finalized = false;
 	uint16_t _tfdf_size = 0;
 };
@@ -78,12 +80,10 @@ struct input_map_frame_params
 class map_acceptor
 {
 public:
-	typedef std::function<void(const acceptor_event &)> event_callback_t;
-
-	map_acceptor(gmapid_t map_id_);
+	map_acceptor(input_stack * stack, gmapid_t map_id_);
 	virtual ~map_acceptor() = default;
 
-	void set_event_callback(event_callback_t event_callback);
+	input_stack & stack() { return *_stack; }
 
 	void finalize();
 
@@ -106,7 +106,7 @@ protected:
 	bool is_finalized() const { return _finalized; }
 
 private:
-	event_callback_t _event_callback = nullptr;
+	input_stack * _stack;
 	bool _finalized = false;
 };
 

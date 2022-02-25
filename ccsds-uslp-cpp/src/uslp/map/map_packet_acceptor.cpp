@@ -11,14 +11,14 @@
 namespace ccsds { namespace uslp {
 
 
-map_packet_sink::map_packet_sink(gmapid_t channel_id) // @suppress("Class members should be properly initialized")
-	: map_acceptor(channel_id)
+map_packet_acceptor::map_packet_acceptor(input_stack * stack, gmapid_t channel_id)
+	: map_acceptor(stack, channel_id), _prev_frame_qos()
 {
 
 }
 
 
-void map_packet_sink::max_packet_size(size_t value)
+void map_packet_acceptor::max_packet_size(size_t value)
 {
 	if (is_finalized())
 	{
@@ -31,7 +31,7 @@ void map_packet_sink::max_packet_size(size_t value)
 }
 
 
-void map_packet_sink::emit_idle_packets(bool value)
+void map_packet_acceptor::emit_idle_packets(bool value)
 {
 	if (is_finalized())
 	{
@@ -40,17 +40,17 @@ void map_packet_sink::emit_idle_packets(bool value)
 		throw object_is_finalized(error.str());
 	}
 
-	map_packet_sink::_emit_idle_packets = value;
+	map_packet_acceptor::_emit_idle_packets = value;
 }
 
 
-void map_packet_sink::finalize_impl()
+void map_packet_acceptor::finalize_impl()
 {
 	map_acceptor::finalize_impl();
 }
 
 
-void map_packet_sink::push_impl(
+void map_packet_acceptor::push_impl(
 		const input_map_frame_params & params,
 		const uint8_t * tfdf_buffer, uint16_t tfdf_buffer_size
 )
@@ -118,7 +118,7 @@ void map_packet_sink::push_impl(
 }
 
 
-void map_packet_sink::_consume_bytes(const uint8_t * begin, const uint8_t * end)
+void map_packet_acceptor::_consume_bytes(const uint8_t * begin, const uint8_t * end)
 {
 	// Ну, на последовательность все проверяли выше
 	// Поэтому мы просто жрем все байты в наш буфер
@@ -129,7 +129,7 @@ void map_packet_sink::_consume_bytes(const uint8_t * begin, const uint8_t * end)
 }
 
 
-void map_packet_sink::_parse_packets()
+void map_packet_acceptor::_parse_packets()
 {
 
 again:
@@ -189,13 +189,13 @@ again:
 }
 
 
-void map_packet_sink::_flush_accum(int event_flags)
+void map_packet_acceptor::_flush_accum(int event_flags)
 {
 	_flush_accum(_accumulator.end(), event_flags);
 }
 
 
-void map_packet_sink::_flush_accum(accum_t::const_iterator flush_zone_end, int event_flags)
+void map_packet_acceptor::_flush_accum(accum_t::const_iterator flush_zone_end, int event_flags)
 {
 	acceptor_event_map_sdu event;
 	event.channel_id = this->channel_id;
@@ -210,7 +210,7 @@ void map_packet_sink::_flush_accum(accum_t::const_iterator flush_zone_end, int e
 }
 
 
-void map_packet_sink::_drop_accum(accum_t::const_iterator drop_zone_end)
+void map_packet_acceptor::_drop_accum(accum_t::const_iterator drop_zone_end)
 {
 	_accumulator.erase(_accumulator.begin(), drop_zone_end);
 	_current_packet_header.reset();

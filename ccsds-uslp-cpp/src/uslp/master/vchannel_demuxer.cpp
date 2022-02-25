@@ -3,8 +3,8 @@
 namespace ccsds { namespace uslp {
 
 
-vchannel_demuxer::vchannel_demuxer(mcid_t mcid_)
-	: mchannel_acceptor(mcid_)
+vchannel_demuxer::vchannel_demuxer(input_stack * stack, mcid_t mcid_)
+	: mchannel_acceptor(stack, mcid_)
 {
 
 }

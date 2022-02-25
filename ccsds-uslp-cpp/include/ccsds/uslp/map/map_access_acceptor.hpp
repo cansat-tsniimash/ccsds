@@ -23,7 +23,7 @@ namespace detail
 class map_access_acceptor: public map_acceptor
 {
 public:
-	map_access_acceptor(gmapid_t mapid_);
+	map_access_acceptor(input_stack * stack, gmapid_t mapid_);
 	virtual ~map_access_acceptor() = default;
 
 	void max_sdu_size(size_t value) { _max_sdu_size = value; }
@@ -57,9 +57,6 @@ private:
 	qos_t _prev_frame_qos;
 	//! Номер последнего пришедшего фрейма
 	std::optional<frame_seq_no_t> _prev_frame_seq_no;
-
-	//! Коллбек для событий
-	event_callback_t _event_callback;
 };
 
 

@@ -2,8 +2,9 @@
 
 namespace ccsds { namespace uslp {
 
-map_demuxer::map_demuxer(gvcid_t gvcid_)
-	: vchannel_acceptor(gvcid_)
+
+map_demuxer::map_demuxer(input_stack * stack, gvcid_t gvcid_)
+	: vchannel_acceptor(stack, gvcid_)
 {
 
 }

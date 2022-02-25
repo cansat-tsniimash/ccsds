@@ -5,6 +5,9 @@
 
 #include <endian.h>
 
+#include <ccsds/uslp/input_stack.hpp>
+#include <ccsds/uslp/output_stack.hpp>
+
 #include <ccsds/uslp/exceptions.hpp>
 #include <ccsds/uslp/virtual/abstract_vchannel.hpp>
 #include <ccsds/uslp/_detail/tf_header.hpp>
@@ -13,17 +16,10 @@
 namespace ccsds { namespace uslp {
 
 
-template<typename T>
-static void _default_event_callback(const T &)
+mchannel_emitter::mchannel_emitter(output_stack * stack, mcid_t mcid_)
+	: channel_id(mcid_), _stack(stack)
 {
 
-}
-
-
-mchannel_emitter::mchannel_emitter(mcid_t mcid_)
-	: channel_id(mcid_)
-{
-	set_event_callback(_default_event_callback<emitter_event>);
 }
 
 
@@ -50,19 +46,6 @@ void mchannel_emitter::id_is_destination(bool value)
 	}
 
 	_id_is_destination = value;
-}
-
-
-void mchannel_emitter::set_event_callback(event_callback_t event_callback)
-{
-	if (_finalized)
-	{
-		std::stringstream error;
-		error << "unable to use set_event_callback on mchannel source, because it is finalized";
-		throw object_is_finalized(error.str());
-	}
-
-	_event_callback = std::move(event_callback);
 }
 
 
@@ -192,7 +175,7 @@ uint16_t mchannel_emitter::frame_size_overhead() const
 
 void mchannel_emitter::emit_event(const emitter_event & evt)
 {
-	_event_callback(evt);
+	_stack->dispatch_event(evt);
 }
 
 
@@ -216,10 +199,10 @@ void mchannel_emitter::finalize_impl()
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
-mchannel_acceptor::mchannel_acceptor(mcid_t mcid_)
-	: channel_id(mcid_)
+mchannel_acceptor::mchannel_acceptor(input_stack * stack, mcid_t mcid_)
+	: channel_id(mcid_), _stack(stack)
 {
-	set_event_callback(_default_event_callback<acceptor_event>);
+
 }
 
 
@@ -246,19 +229,6 @@ void mchannel_acceptor::add_vchannel_acceptor(vchannel_acceptor * sink)
 	}
 
 	add_vchannel_acceptor_impl(sink);
-}
-
-
-void mchannel_acceptor::set_event_callback(event_callback_t event_callback)
-{
-	if (_finalized)
-	{
-		std::stringstream error;
-		error << "unable to use set_event_callback() on mchannel sink because it is finalized";
-		throw object_is_finalized(error.str());
-	}
-
-	_event_callback = std::move(event_callback);
 }
 
 
@@ -313,7 +283,7 @@ void mchannel_acceptor::push(
 
 void mchannel_acceptor::emit_event(const acceptor_event & evt)
 {
-	_event_callback(evt);
+	_stack->dispatch_event(evt);
 }
 
 
@@ -321,7 +291,6 @@ void mchannel_acceptor::finalize_impl()
 {
 	// Ничего не делаем!
 }
-
 
 
 }}
