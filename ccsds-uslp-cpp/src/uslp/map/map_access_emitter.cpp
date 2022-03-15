@@ -22,6 +22,7 @@ void map_access_emitter::add_sdu(payload_cookie_t cookie, const uint8_t * data, 
 	data_unit_t du;
 	std::copy(data, data + data_size, std::back_inserter(du.data));
 	du.data_original_size = data_size;
+	du.current_part_no = 0;
 	du.qos = qos;
 	du.cookie = cookie;
 
@@ -70,7 +71,9 @@ bool map_access_emitter::peek_tfdf_impl(output_map_frame_params & params)
 	{
 		// Если следующий фрейм вмещает последние байты нашего SDU
 		// Покрасим этот SDU кукисом, чтобы получить о нем отчеты дальше по стеку
-		params.payload_cookies.push_back(front_elem.cookie);
+		const bool is_final_part = !params.channel_lock;
+		payload_cookie_ref ref{front_elem.cookie, front_elem.current_part_no, is_final_part};
+		params.payload_cookies.push_back(std::move(ref));
 	}
 	return true;
 }
@@ -103,6 +106,8 @@ void map_access_emitter::pop_tfdf_impl(uint8_t * tfdf_buffer)
 	auto to_copy_begin = std::cbegin(data_unit.data);
 	auto to_copy_end = std::next(to_copy_begin, to_copy_size);
 	std::copy(to_copy_begin, to_copy_end, tfdz_buffer);
+	// Показываем что этот кусок мы уже отправили
+	data_unit.current_part_no++;
 
 	// Откусываем скопированное
 	bool element_ended = false;

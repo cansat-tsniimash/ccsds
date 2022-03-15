@@ -134,10 +134,10 @@ void pchannel_emitter::pop(uint8_t * frame_buffer, size_t frame_buffer_size)
 	assert(frame_size() <= frame_buffer_size);
 	pop_impl(frame_buffer);
 
-	for (const auto & cookie: frame_params.payload_cookies)
+	for (const auto & cookie_ref: frame_params.payload_cookies)
 	{
 		emitter_event_sdu_emitted event;
-		event.payload_cookie = cookie;
+		event.payload_cookie = cookie_ref;
 		emit_event(event);
 	}
 }

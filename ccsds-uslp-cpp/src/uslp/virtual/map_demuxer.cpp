@@ -44,7 +44,7 @@ void map_demuxer::push_impl(
 		break;
 
 	case frame_class_t::EXPEDITED_PAYLOAD:
-		map_params.qos = qos_t::EXPIDITED;
+		map_params.qos = qos_t::EXPEDITED;
 		break;
 
 	default:

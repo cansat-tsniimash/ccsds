@@ -65,7 +65,7 @@ bool map_rr_muxer::peek_impl(vchannel_frame_params & params)
 
 	switch (map_params.qos)
 	{
-	case qos_t::EXPIDITED:
+	case qos_t::EXPEDITED:
 		params.frame_class = frame_class_t::EXPEDITED_PAYLOAD;
 		break;
 

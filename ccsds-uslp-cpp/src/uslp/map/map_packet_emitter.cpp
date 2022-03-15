@@ -27,6 +27,7 @@ void map_packet_emitter::add_packet(
 	data_unit_t du;
 
 	du.original_packet_size = packet_size;
+	du.current_part_no = 0;
 	du.qos = qos;
 	du.cookie = cookie;
 
@@ -48,6 +49,7 @@ void map_packet_emitter::add_encapsulate_data(
 
 	data_unit_t du;
 	du.original_packet_size = packet_size;
+	du.current_part_no = 0;
 	du.qos = qos;
 	du.cookie = cookie;
 
@@ -78,7 +80,6 @@ void map_packet_emitter::finalize_impl()
 
 bool map_packet_emitter::peek_tfdf_impl()
 {
-	// Тут оптимизации не будет :c
 	return !_data_queue.empty();
 }
 
@@ -120,7 +121,9 @@ bool map_packet_emitter::peek_tfdf_impl(output_map_frame_params & params)
 		continous_stream_size += itt->packet.size();
 		// Так же, если этот пакет целиком (или концом, что не суть важно) пойдет на отправку
 		// - красим фрейм его кукой
-		params.payload_cookies.push_back(itt->cookie);
+		const bool is_final_part = continous_stream_size <= tfdz_size;
+		payload_cookie_ref ref{itt->cookie, itt->current_part_no, is_final_part};
+		params.payload_cookies.push_back(std::move(ref));
 	}
 
 	// Мы посчитали сколько байт мы будем отправлять неразрывно
@@ -167,6 +170,8 @@ void map_packet_emitter::pop_tfdf_impl(uint8_t * tfdf_buffer)
 		const auto to_copy_end = std::next(to_copy_begin, to_copy_size);
 		std::copy(to_copy_begin, to_copy_end, output_buffer);
 		data_unit.packet.erase(to_copy_begin, to_copy_end);
+		// показываем что эту часть мы уже забрали
+		data_unit.current_part_no++;
 
 		// пересчитываем параметры выходного буфера
 		output_buffer += to_copy_size;

@@ -12,7 +12,7 @@ namespace ccsds { namespace uslp {
 
 map_access_acceptor::map_access_acceptor(input_stack * stack, gmapid_t mapid_)
 		: map_acceptor(stack, mapid_),
-		  _prev_frame_qos(qos_t::EXPIDITED) // Просто чтобы не иметь UB
+		  _prev_frame_qos(qos_t::EXPEDITED) // Просто чтобы не иметь UB
 {
 
 }

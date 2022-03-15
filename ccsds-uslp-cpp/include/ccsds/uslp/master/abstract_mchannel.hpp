@@ -51,7 +51,7 @@ struct mchannel_frame_params_t
 	bool ocf_present;
 	std::optional<frame_seq_no_t> frame_seq_no;
 	//! Список кукисов юнитов полезной нагрузки, которые едут в этом фрейме
-	std::vector<payload_cookie_t> payload_cookies;
+	std::vector<payload_cookie_ref> payload_cookies;
 };
 
 

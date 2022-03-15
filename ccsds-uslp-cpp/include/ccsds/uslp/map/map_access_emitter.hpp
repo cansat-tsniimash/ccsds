@@ -36,6 +36,9 @@ protected:
 		std::deque<uint8_t> data;
 		//! Исходный размер этих данных (от деки могут быть откусаны куски)
 		size_t data_original_size;
+		//! Номер куска данных, который будет отправлен следующим
+		/*! (на случай, если данные не влезают в один пакет) */
+		uint64_t current_part_no;
 		//! Каким типом передачи будем гнать этот блок данных
 		qos_t qos;
 		//! Идентификатор данных
@@ -46,7 +49,6 @@ protected:
 	uint16_t _tfdz_size() const;
 
 private:
-
 	std::deque<data_unit_t> _data_queue;
 };
 

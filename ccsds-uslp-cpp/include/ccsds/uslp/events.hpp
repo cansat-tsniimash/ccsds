@@ -32,7 +32,7 @@ struct emitter_event_sdu_emitted: public emitter_event
 	emitter_event_sdu_emitted(): emitter_event(kind_t::SDU_EMITTED) {}
 	virtual ~emitter_event_sdu_emitted() = default;
 
-	payload_cookie_t payload_cookie = 0;
+	payload_cookie_ref payload_cookie;
 };
 
 
@@ -67,7 +67,7 @@ struct acceptor_event_map_sdu: public acceptor_event
 
 	gmapid_t channel_id;
 	std::vector<uint8_t> data;
-	qos_t qos = qos_t::EXPIDITED;
+	qos_t qos = qos_t::EXPEDITED;
 	uint64_t flags = 0;
 };
 

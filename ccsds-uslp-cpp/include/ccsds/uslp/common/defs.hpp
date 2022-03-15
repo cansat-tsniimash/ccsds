@@ -13,13 +13,21 @@ namespace ccsds { namespace uslp {
 typedef uint64_t payload_cookie_t;
 
 
+struct payload_cookie_ref
+{
+	uint64_t cookie;
+	uint64_t part_no;
+	bool final;
+};
+
+
 //! Класс отправки данных
 enum class qos_t
 {
 	//! С контролем номера фрейма и гарантией доставки
 	SEQUENCE_CONTROLLED,
 	//! Как получится
-	EXPIDITED,
+	EXPEDITED,
 };
 
 
