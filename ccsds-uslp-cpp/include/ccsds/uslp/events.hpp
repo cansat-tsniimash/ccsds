@@ -32,7 +32,7 @@ struct emitter_event_sdu_emitted: public emitter_event
 	emitter_event_sdu_emitted(): emitter_event(kind_t::SDU_EMITTED) {}
 	virtual ~emitter_event_sdu_emitted() = default;
 
-	payload_cookie_ref payload_cookie;
+	payload_part_cookie_t payload_cookie;
 };
 
 

@@ -72,7 +72,7 @@ bool map_access_emitter::peek_tfdf_impl(output_map_frame_params & params)
 		// Если следующий фрейм вмещает последние байты нашего SDU
 		// Покрасим этот SDU кукисом, чтобы получить о нем отчеты дальше по стеку
 		const bool is_final_part = !params.channel_lock;
-		payload_cookie_ref ref{front_elem.cookie, front_elem.current_part_no, is_final_part};
+		payload_part_cookie_t ref{front_elem.cookie, front_elem.current_part_no, is_final_part};
 		params.payload_cookies.push_back(std::move(ref));
 	}
 	return true;

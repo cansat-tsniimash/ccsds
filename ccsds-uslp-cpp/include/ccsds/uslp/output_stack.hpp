@@ -52,6 +52,8 @@ public:
 
 	void dispatch_event(const emitter_event & event);
 
+	map_emitter * get_map_channel(const gmapid_t & id);
+
 private:
 	output_stack_event_handler * _event_handler;
 

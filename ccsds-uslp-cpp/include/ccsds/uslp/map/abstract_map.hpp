@@ -28,7 +28,7 @@ struct output_map_frame_params
 	//! Можно ли переходить к следующему map каналу после отправки этого фрейма
 	bool channel_lock;
 	//! Список кукисов юнитов полезной нагрузки, которые едут в этом фрейме
-	std::vector<payload_cookie_ref> payload_cookies;
+	std::vector<payload_part_cookie_t> payload_cookies;
 };
 
 

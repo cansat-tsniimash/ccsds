@@ -13,9 +13,9 @@ namespace ccsds { namespace uslp {
 typedef uint64_t payload_cookie_t;
 
 
-struct payload_cookie_ref
+struct payload_part_cookie_t
 {
-	uint64_t cookie;
+	payload_cookie_t cookie;
 	uint64_t part_no;
 	bool final;
 };

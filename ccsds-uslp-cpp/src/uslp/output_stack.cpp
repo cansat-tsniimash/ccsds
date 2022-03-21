@@ -57,4 +57,15 @@ void output_stack::dispatch_event(const emitter_event & event)
 	}
 }
 
+
+map_emitter * output_stack::get_map_channel(const gmapid_t & id)
+{
+	auto itt = _maps.find(id);
+	if (_maps.end() == itt)
+		return nullptr;
+
+	return itt->second;
+}
+
+
 }}

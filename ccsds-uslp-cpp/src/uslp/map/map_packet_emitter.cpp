@@ -122,7 +122,7 @@ bool map_packet_emitter::peek_tfdf_impl(output_map_frame_params & params)
 		// Так же, если этот пакет целиком (или концом, что не суть важно) пойдет на отправку
 		// - красим фрейм его кукой
 		const bool is_final_part = continous_stream_size <= tfdz_size;
-		payload_cookie_ref ref{itt->cookie, itt->current_part_no, is_final_part};
+		payload_part_cookie_t ref{itt->cookie, itt->current_part_no, is_final_part};
 		params.payload_cookies.push_back(std::move(ref));
 	}
 
