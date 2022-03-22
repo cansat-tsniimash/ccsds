@@ -50,6 +50,8 @@ public:
 	template<typename T, typename... ARGS>
 	T * create_pchannel(std::string name, ARGS && ...args);
 
+	void finalize();
+
 	void dispatch_event(const emitter_event & event);
 
 	map_emitter * get_map_channel(const gmapid_t & id);

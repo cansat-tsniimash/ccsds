@@ -68,6 +68,19 @@ object_is_finalized::object_is_finalized(const std::string & what)
 }
 
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+not_implemented::not_implemented(const char * what)
+	: exception(what)
+{}
+
+not_implemented::not_implemented(const std::string & what)
+	: exception(what)
+{}
+
+
 }
 
 

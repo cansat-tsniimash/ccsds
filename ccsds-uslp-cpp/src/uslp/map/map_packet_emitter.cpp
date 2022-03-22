@@ -20,11 +20,30 @@ map_packet_emitter::map_packet_emitter(output_stack * stack, gmapid_t map_id_)
 }
 
 
-void map_packet_emitter::add_packet(
+void map_packet_emitter::push_sdu(
 		payload_cookie_t cookie, const uint8_t * packet, size_t packet_size, qos_t qos
 )
 {
 	data_unit_t du;
+
+	// Проверим что это пакет, так как только их мы можем здесь отправлять
+	const auto epp_header_size = epp::header_t::probe_header_size(*packet);
+	if (0 == epp_header_size)
+		throw einval_exception("suppliet packet is not epp packet. space packets is not supported here (yel?)");
+
+	// Проверим размер пакета
+	epp::header_t header;
+	header.read(packet, epp_header_size);
+
+	if (header.real_packet_size() != packet_size)
+	{
+		std::stringstream error;
+		error << "invalid epp packet size in header. "
+			<< "In header: " << header.real_packet_size() << ", "
+			<< "provided: " << packet_size
+		;
+		throw einval_exception(error.str());
+	}
 
 	du.original_packet_size = packet_size;
 	du.current_part_no = 0;
@@ -33,32 +52,6 @@ void map_packet_emitter::add_packet(
 
 	du.packet.resize(packet_size);
 	std::copy(packet, packet + packet_size, du.packet.begin());
-
-	_data_queue.push_back(std::move(du));
-}
-
-
-void map_packet_emitter::add_encapsulate_data(
-		payload_cookie_t cookie, const uint8_t * data, size_t data_size,
-		qos_t qos, epp::protocol_id_t proto_id
-)
-{
-	epp::header_t header;
-	header.protocol_id = static_cast<int>(proto_id);
-	const auto packet_size = header.accomadate_to_payload_size(data_size);
-
-	data_unit_t du;
-	du.original_packet_size = packet_size;
-	du.current_part_no = 0;
-	du.qos = qos;
-	du.cookie = cookie;
-
-	du.packet.resize(packet_size);
-	auto header_end_itt = std::next(du.packet.begin(), header.size());
-	header.write(du.packet.begin(), header_end_itt);
-
-	assert(data_size == static_cast<size_t>(std::distance(header_end_itt, du.packet.end())));
-	std::copy(data, data + data_size, header_end_itt);
 
 	_data_queue.push_back(std::move(du));
 }

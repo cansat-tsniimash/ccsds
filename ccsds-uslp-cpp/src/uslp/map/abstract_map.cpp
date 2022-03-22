@@ -83,6 +83,17 @@ void map_emitter::pop_tfdf(uint8_t * tfdf_buffer, uint16_t tfdf_buffer_size)
 }
 
 
+void map_emitter::push_sdu(
+		payload_cookie_t cookie, const uint8_t * packet, size_t packet_size,
+		qos_t qos
+)
+{
+	throw not_implemented(
+			"method push_sdu is not implemented for this map emitter instance"
+			);
+}
+
+
 void map_emitter::finalize_impl()
 {
 	// Тут нам нечего проверять так то...

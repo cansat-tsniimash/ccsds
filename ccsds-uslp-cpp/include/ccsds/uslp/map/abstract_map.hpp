@@ -49,6 +49,11 @@ public:
 	bool peek_tfdf(output_map_frame_params & params);
 	void pop_tfdf(uint8_t * tfdf_buffer, uint16_t tfdf_buffer_size);
 
+	virtual void push_sdu(
+			payload_cookie_t cookie, const uint8_t * packet, size_t packet_size,
+			qos_t qos
+	);
+
 	const gmapid_t channel_id;
 
 protected:

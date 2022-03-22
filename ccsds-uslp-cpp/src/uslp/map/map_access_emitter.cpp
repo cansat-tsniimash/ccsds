@@ -17,7 +17,9 @@ map_access_emitter::map_access_emitter(output_stack * stack, gmapid_t map_id_)
 }
 
 
-void map_access_emitter::add_sdu(payload_cookie_t cookie, const uint8_t * data, size_t data_size, qos_t qos)
+void map_access_emitter::push_sdu(
+		payload_cookie_t cookie, const uint8_t * data, size_t data_size, qos_t qos
+)
 {
 	data_unit_t du;
 	std::copy(data, data + data_size, std::back_inserter(du.data));

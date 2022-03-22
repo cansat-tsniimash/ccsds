@@ -47,6 +47,8 @@ public:
 	template<typename T, typename... ARGS>
 	T * create_pchannel(std::string name, ARGS && ...args);
 
+	void finalize();
+
 	void dispatch_event(const acceptor_event & event);
 
 private:

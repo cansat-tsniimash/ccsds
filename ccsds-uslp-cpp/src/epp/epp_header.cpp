@@ -28,9 +28,9 @@ uint16_t header_t::probe_header_size(const uint8_t first_buffer_byte)
 	case 0x00: return 1;
 	case 0x01: return 2;
 	case 0x02: return 4;
-	case 0x04: return 8;
+	case 0x03: return 8;
 	default:
-		assert(false); // быть такого не может
+		assert(false); // быть такого не может, выше проверены все варианты на 2 бита
 		return 0;
 	};
 }
@@ -167,7 +167,7 @@ void header_t::read(const uint8_t * buffer, size_t buffer_size)
 	const uint8_t byte1 = buffer[0];
 	const auto header_size = probe_header_size(byte1);
 	if (header_size == 0)
-		throw einval_exception("invalid epp packet header. PVN is invalid");
+		throw einval_exception("invalid epp packet header. PVN or size of size is invalid");
 
 	// Снова проверяем на длину буфера...
 	if (header_size > buffer_size)

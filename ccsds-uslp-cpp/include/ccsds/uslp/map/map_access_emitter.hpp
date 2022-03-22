@@ -19,7 +19,9 @@ public:
 	map_access_emitter(output_stack * stack, gmapid_t map_id_);
 	virtual ~map_access_emitter() = default;
 
-	void add_sdu(payload_cookie_t cookie, const uint8_t * data, size_t data_size, qos_t qos);
+	virtual void push_sdu(
+			payload_cookie_t cookie, const uint8_t * packet, size_t packet_size, qos_t qos
+	) override;
 
 protected:
 	virtual void finalize_impl() override;

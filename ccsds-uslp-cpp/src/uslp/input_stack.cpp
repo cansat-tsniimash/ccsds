@@ -32,6 +32,13 @@ void input_stack::push_frame(const uint8_t * frame_data, size_t frame_data_size)
 }
 
 
+void input_stack::finalize()
+{
+	assert(_pchannel);
+	_pchannel->finalize();
+}
+
+
 void input_stack::dispatch_event(const acceptor_event & event)
 {
 	switch (event.kind)

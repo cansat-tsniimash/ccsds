@@ -46,6 +46,16 @@ namespace ccsds {
 		object_is_finalized(const std::string & what);
 		virtual ~object_is_finalized() = default;
 	};
+
+
+	class not_implemented: public exception
+	{
+	public:
+		not_implemented() = default;
+		not_implemented(const char * what);
+		not_implemented(const std::string & what);
+		virtual ~not_implemented() = default;
+	};
 }
 
 

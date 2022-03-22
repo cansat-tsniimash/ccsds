@@ -44,6 +44,13 @@ void output_stack::pop_frame(uint8_t * frame_buffer, size_t frame_buffer_size)
 }
 
 
+void output_stack::finalize()
+{
+	assert(_pchannel);
+	_pchannel->finalize();
+}
+
+
 void output_stack::dispatch_event(const emitter_event & event)
 {
 	switch(event.kind)
@@ -64,7 +71,7 @@ map_emitter * output_stack::get_map_channel(const gmapid_t & id)
 	if (_maps.end() == itt)
 		return nullptr;
 
-	return itt->second;
+	return itt->second.get();
 }
 
 
