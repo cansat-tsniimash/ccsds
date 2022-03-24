@@ -11,6 +11,28 @@ namespace ccsds { namespace uslp {
 static output_stack_event_handler _default_event_handler;
 
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+void output_stack_event_handler::dispatch_event(const emitter_event & event)
+{
+	switch(event.kind)
+	{
+	case emitter_event::kind_t::SDU_EMITTED:
+		_on_frame_emitted(dynamic_cast<const emitter_event_sdu_emitted&>(event));
+		break;
+
+	default:
+		assert(false);
+	}
+}
+
+
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
 output_stack::output_stack()
 {
 	set_event_handler(&_default_event_handler);
@@ -53,15 +75,7 @@ void output_stack::finalize()
 
 void output_stack::dispatch_event(const emitter_event & event)
 {
-	switch(event.kind)
-	{
-	case emitter_event::kind_t::SDU_EMITTED:
-		_event_handler->on_frame_emitted(dynamic_cast<const emitter_event_sdu_emitted&>(event));
-		break;
-
-	default:
-		assert(false);
-	}
+	_event_handler->dispatch_event(event);
 }
 
 

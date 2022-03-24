@@ -23,7 +23,10 @@ public:
 	output_stack_event_handler() = default;
 	virtual ~output_stack_event_handler() = default;
 
-	virtual void on_frame_emitted(const emitter_event_sdu_emitted & evt) {}
+	void dispatch_event(const emitter_event & event);
+
+protected:
+	virtual void _on_frame_emitted(const emitter_event_sdu_emitted & evt) {}
 };
 
 

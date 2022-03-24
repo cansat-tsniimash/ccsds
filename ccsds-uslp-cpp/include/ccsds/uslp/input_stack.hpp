@@ -22,7 +22,10 @@ public:
 	input_stack_event_handler() = default;
 	virtual ~input_stack_event_handler() = default;
 
-	virtual void on_map_sdu_event(const acceptor_event_map_sdu & event) {}
+	void dispatch_event(const acceptor_event & event);
+
+protected:
+	virtual void _on_map_sdu_event(const acceptor_event_map_sdu & event) {}
 };
 
 

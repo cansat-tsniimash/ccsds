@@ -11,6 +11,29 @@ namespace ccsds { namespace uslp {
 static input_stack_event_handler _default_event_handler;
 
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+void input_stack_event_handler::dispatch_event(const acceptor_event & event)
+{
+	switch (event.kind)
+	{
+	case acceptor_event::kind_t::MAP_SDU:
+		_on_map_sdu_event(dynamic_cast<const acceptor_event_map_sdu&>(event));
+		break;
+
+	default:
+		assert(false);
+		break;
+	}
+}
+
+
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
 input_stack::input_stack()
 {
 	set_event_handler(&_default_event_handler);
@@ -41,16 +64,7 @@ void input_stack::finalize()
 
 void input_stack::dispatch_event(const acceptor_event & event)
 {
-	switch (event.kind)
-	{
-	case acceptor_event::kind_t::MAP_SDU:
-		_event_handler->on_map_sdu_event(dynamic_cast<const acceptor_event_map_sdu&>(event));
-		break;
-
-	default:
-		assert(false);
-		break;
-	}
+	_event_handler->dispatch_event(event);
 }
 
 
