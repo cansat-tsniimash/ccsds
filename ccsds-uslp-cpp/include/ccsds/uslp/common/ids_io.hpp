@@ -17,7 +17,7 @@ std::basic_ostream<CHAR_TYPE, TRAITS_TYPE> & operator<<(
 		std::basic_ostream<CHAR_TYPE, TRAITS_TYPE> & stream, const mcid_t & mcid
 )
 {
-	auto flags = stream.flags();
+	const auto flags = stream.flags();
 	try
 	{
 		stream << "mcid(0x"
@@ -29,6 +29,7 @@ std::basic_ostream<CHAR_TYPE, TRAITS_TYPE> & operator<<(
 	catch (...)
 	{
 		stream.flags(flags);
+		throw;
 	}
 
 	return stream;
@@ -40,7 +41,7 @@ std::basic_ostream<CHAR_TYPE, TRAITS_TYPE> & operator<<(
 		std::basic_ostream<CHAR_TYPE, TRAITS_TYPE> & stream, const gvcid_t & gvcid
 )
 {
-	auto flags = stream.flags();
+	const auto flags = stream.flags();
 	try
 	{
 		stream << "gvcid("
@@ -53,6 +54,7 @@ std::basic_ostream<CHAR_TYPE, TRAITS_TYPE> & operator<<(
 	catch (...)
 	{
 		stream.flags(flags);
+		throw;
 	}
 
 	return stream;
@@ -65,12 +67,12 @@ std::basic_ostream<CHAR_TYPE, TRAITS_TYPE> & operator<<(
 		std::basic_ostream<CHAR_TYPE, TRAITS_TYPE> & stream, const gmapid_t & gmapid
 )
 {
-	auto flags = stream.flags();
+	const auto flags = stream.flags();
 	try
 	{
 		stream << "gmapid("
 				<< "0x" << std::hex << std::setw(4) << std::setfill('0') << gmapid.sc_id() << ", "
-				<< "0x" << std::hex << std::setw(2) << std::setfill('0') << (int)gmapid.vchannel_id()
+				<< "0x" << std::hex << std::setw(2) << std::setfill('0') << (int)gmapid.vchannel_id() << ", "
 				<< "0x" << std::hex << std::setw(2) << std::setfill('0') << (int)gmapid.map_id()
 				<< ")"
 		;
@@ -79,6 +81,7 @@ std::basic_ostream<CHAR_TYPE, TRAITS_TYPE> & operator<<(
 	catch (...)
 	{
 		stream.flags(flags);
+		throw;
 	}
 
 	return stream;

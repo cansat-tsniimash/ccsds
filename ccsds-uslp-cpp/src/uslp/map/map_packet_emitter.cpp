@@ -29,11 +29,11 @@ void map_packet_emitter::push_sdu(
 	// Проверим что это пакет, так как только их мы можем здесь отправлять
 	const auto epp_header_size = epp::header_t::probe_header_size(*packet);
 	if (0 == epp_header_size)
-		throw einval_exception("suppliet packet is not epp packet. space packets is not supported here (yel?)");
+		throw einval_exception("supplied packet is not an epp packet. space packets is not supported here (yel?)");
 
 	// Проверим размер пакета
 	epp::header_t header;
-	header.read(packet, epp_header_size);
+	header.read(packet, packet_size);
 
 	if (header.real_packet_size() != packet_size)
 	{

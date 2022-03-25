@@ -63,7 +63,7 @@ uint16_t header_t::size() const
 	if (user_defined_field)
 		return 4;
 
-	// А так же проверим на длину пакета. если не влезает в 2 байт - быть заголовку 4ехбайтным
+	// А так же проверим на длину пакета. если не влезает в 1 байт - быть заголовку 4ехбайтным
 	if (packet_size > 0xFF)
 		return 4;
 
@@ -174,7 +174,7 @@ void header_t::read(const uint8_t * buffer, size_t buffer_size)
 	{
 		std::stringstream error;
 		error << "unable to read epp header. Provided buffer is too small ("
-				<< header_size << " < " << buffer_size;
+				<< header_size << " < " << buffer_size << ")";
 		throw einval_exception(error.str());
 	}
 
@@ -250,8 +250,8 @@ void header_t::real_packet_size(uint64_t value)
 uint64_t header_t::accomadate_to_payload_size(uint64_t payload_size)
 {
 	// Действуем итеративно
-	packet_size = payload_size;
 	auto header_size = size();
+	packet_size = payload_size + header_size - 1; // -1 по спеке
 
 	// FIXME: У меня сильные подозрения что тут можно и не вайлом
 	// а просто в два ифа, но проверять это некогда

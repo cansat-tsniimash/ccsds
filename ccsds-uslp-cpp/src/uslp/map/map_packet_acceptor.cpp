@@ -65,6 +65,14 @@ void map_packet_acceptor::push_impl(
 	// Читаем заголовок tfdf
 	detail::tfdf_header_t tfdf_header;
 	tfdf_header.read(tfdf_buffer, true);
+	if (tfdf_header.ctr_rule != detail::tfdz_construction_rule_t::PACKETS_SPANNING_MULTIPLE_FRAMES)
+	{
+		// Это не MAPP данные!
+		//сбрасываем их
+		_flush_accum(acceptor_event_map_sdu::INCOMPLETE);
+		return;
+	}
+
 	const uint8_t * const tfdz_start = tfdf_buffer + tfdf_header.size();
 	const size_t tfdz_size = tfdf_buffer_size - tfdf_header.size();
 

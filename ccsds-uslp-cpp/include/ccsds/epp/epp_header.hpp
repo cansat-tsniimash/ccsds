@@ -70,7 +70,7 @@ struct header_t
 	}
 
 	//! реальная длина пакета
-	uint64_t real_packet_size() const { return packet_size + 1; }
+	uint64_t real_packet_size() const { return static_cast<uint64_t>(packet_size) + 1; }
 	//! Установка реальной длины пакета. Не может быть 0 и не может быть больше uin32_max + 1
 	void real_packet_size(uint64_t value);
 
