@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 
 
-project(ccsds-uslp-cpp
+project(ccsds
 	VERSION 0.1
-	DESCRIPTION "CCSDS USLP protocol implementation. Not complete"
+	DESCRIPTION "Some CCSDS protocols implementation. Not complete and customized"
 	LANGUAGES CXX
 )
 
@@ -12,13 +12,20 @@ set(_INC_DIR include/ccsds)
 set(_SRC_DIR src)
 
 
-add_library(ccsds-uslp STATIC
+add_library(ccsds-common STATIC
+	${_INC_DIR}/common/exceptions.hpp
+	${_SRC_DIR}/common/exceptions.cpp
+)
+
+
+add_library(ccsds-epp STATIC
 	${_INC_DIR}/epp/epp_header.hpp
 	${_SRC_DIR}/epp/epp_header.cpp
+)
 
+
+add_library(ccsds-uslp STATIC
 	${_INC_DIR}/uslp/events.hpp
-	${_INC_DIR}/uslp/exceptions.hpp
-	${_SRC_DIR}/uslp/exceptions.cpp
 	${_INC_DIR}/uslp/idle_pattern.hpp
 	${_SRC_DIR}/uslp/idle_pattern.cpp
 	${_INC_DIR}/uslp/input_stack.hpp
@@ -72,9 +79,28 @@ add_library(ccsds-uslp STATIC
 
 )
 
+
+target_link_libraries(ccsds-epp PUBLIC ccsds-common)
+target_link_libraries(ccsds-uslp PUBLIC ccsds-common ccsds-epp)
+
+
+target_include_directories(ccsds-common PUBLIC include)
+target_include_directories(ccsds-epp PUBLIC include)
 target_include_directories(ccsds-uslp PUBLIC include)
 
 
+set_target_properties(ccsds-common
+PROPERTIES
+	CXX_STANDARD 17
+	CXX_STANDARD_REQUIRED YES
+	CXX_EXTENSIONS NO
+)
+set_target_properties(ccsds-epp
+PROPERTIES
+	CXX_STANDARD 17
+	CXX_STANDARD_REQUIRED YES
+	CXX_EXTENSIONS NO
+)
 set_target_properties(ccsds-uslp
 PROPERTIES
 	CXX_STANDARD 17
@@ -83,4 +109,6 @@ PROPERTIES
 )
 
 
+add_library(ccsds::common ALIAS ccsds-common)
+add_library(ccsds::epp ALIAS ccsds-epp)
 add_library(ccsds::uslp ALIAS ccsds-uslp)

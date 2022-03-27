@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-#include <ccsds/uslp/exceptions.hpp>
+#include <ccsds/common/exceptions.hpp>
 
 
 namespace ccsds { namespace uslp {

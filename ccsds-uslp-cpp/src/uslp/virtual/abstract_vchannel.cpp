@@ -6,7 +6,8 @@
 #include <ccsds/uslp/output_stack.hpp>
 #include <ccsds/uslp/input_stack.hpp>
 
-#include <ccsds/uslp/exceptions.hpp>
+#include <ccsds/common/exceptions.hpp>
+
 #include <ccsds/uslp/_detail/tf_header.hpp>
 #include <ccsds/uslp/map/abstract_map.hpp>
 

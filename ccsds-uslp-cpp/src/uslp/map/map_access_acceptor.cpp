@@ -3,7 +3,7 @@
 #include <sstream>
 #include <cassert>
 
-#include <ccsds/uslp/exceptions.hpp>
+#include <ccsds/common/exceptions.hpp>
 #include <ccsds/uslp/_detail/tfdf_header.hpp>
 
 
