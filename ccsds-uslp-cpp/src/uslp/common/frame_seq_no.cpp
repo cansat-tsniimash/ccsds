@@ -10,24 +10,26 @@ namespace ccsds { namespace uslp {
 
 static const uint64_t _mask_for_byte_size(uint8_t mask_len)
 {
-	// FIXME: Подумать - маску нужной длины можно получить одним изящным сдвигом вправо
-	switch (mask_len)
+	if (mask_len < 0 || mask_len > 8)
 	{
-	case 0: return 0x0000000000000000;
-	case 1: return 0x00000000000000FF;
-	case 2: return 0x000000000000FFFF;
-	case 3: return 0x0000000000FFFFFF;
-	case 4: return 0x00000000FFFFFFFF;
-	case 5: return 0x000000FFFFFFFFFF;
-	case 6: return 0x0000FFFFFFFFFFFF;
-	case 7: return 0x00FFFFFFFFFFFFFF;
-	case 8: return 0xFFFFFFFFFFFFFFFF;
-	default: {
 		std::stringstream error;
 		error << "unable to make bitmask for " << mask_len << " bytes";
 		throw einval_exception(error.str());
 	}
-	}; // case
+
+	static const uint64_t masks[9] = {
+			0x0000000000000000, // 0
+			0x00000000000000FF, // 1
+			0x000000000000FFFF, // 2
+			0x0000000000FFFFFF, // 3
+			0x00000000FFFFFFFF, // 4
+			0x000000FFFFFFFFFF, // 5
+			0x0000FFFFFFFFFFFF, // 6
+			0x00FFFFFFFFFFFFFF, // 7
+			0xFFFFFFFFFFFFFFFF  // 8
+	};
+
+	return masks[mask_len];
 }
 
 
