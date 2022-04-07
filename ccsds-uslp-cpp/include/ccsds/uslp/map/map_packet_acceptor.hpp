@@ -24,6 +24,9 @@ public:
 	void emit_idle_packets(bool value);
 	bool emit_idle_packets() const { return _emit_idle_packets; }
 
+	void emit_stray_data(bool value);
+	bool emit_stray_data() const { return _emit_stray_data; }
+
 protected:
 	virtual void finalize_impl() override;
 	virtual void push_impl(
@@ -39,6 +42,7 @@ private:
 	void _flush_accum(accum_t::const_iterator flush_zone_end, int event_flags);
 	void _flush_accum(int event_flags);
 	void _drop_accum(accum_t::const_iterator drop_zone_end);
+	void _process_stay(const uint8_t * begin, const uint8_t * end);
 
 	//! QOS последнего пришедшего фрейма
 	qos_t _prev_frame_qos;
@@ -53,6 +57,8 @@ private:
 	size_t _max_packet_size = std::numeric_limits<size_t>::max();
 	//! Передавать ли idle пакеты в эвенты
 	bool _emit_idle_packets = false;
+	//! Передавать ли мусорные данные (из середины пакетов) в эвенты
+	bool _emit_stray_data = false;
 };
 
 

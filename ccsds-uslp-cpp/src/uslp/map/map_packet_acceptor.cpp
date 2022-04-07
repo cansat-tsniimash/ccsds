@@ -44,6 +44,19 @@ void map_packet_acceptor::emit_idle_packets(bool value)
 }
 
 
+void map_packet_acceptor::emit_stray_data(bool value)
+{
+	if (is_finalized())
+	{
+		std::stringstream error;
+		error << "Can`t use emit_idle_packets on map_packet_sink, because it is finalized";
+		throw object_is_finalized(error.str());
+	}
+
+	map_packet_acceptor::_emit_stray_data = value;
+}
+
+
 void map_packet_acceptor::finalize_impl()
 {
 	map_acceptor::finalize_impl();
@@ -59,6 +72,8 @@ void map_packet_acceptor::push_impl(
 	{
 		// Этот фрейм не может быть валидным, так как в него ничего не влезает
 		_flush_accum(acceptor_event_map_sdu::INCOMPLETE);
+		_prev_frame_qos = params.qos;
+		_prev_frame_seq_no = params.frame_seq_no;
 		return;
 	}
 
@@ -68,14 +83,16 @@ void map_packet_acceptor::push_impl(
 	if (tfdf_header.ctr_rule != detail::tfdz_construction_rule_t::PACKETS_SPANNING_MULTIPLE_FRAMES)
 	{
 		// Это не MAPP данные!
-		//сбрасываем их
+		// сбрасываем накопленное
 		_flush_accum(acceptor_event_map_sdu::INCOMPLETE);
 		return;
 	}
 
 	const uint8_t * const tfdz_start = tfdf_buffer + tfdf_header.size();
 	const size_t tfdz_size = tfdf_buffer_size - tfdf_header.size();
+	const uint8_t * const tfdz_end = tfdz_start + tfdz_size;
 
+again:
 	// Если мы пустые
 	if (_accumulator.empty())
 	{
@@ -84,13 +101,20 @@ void map_packet_acceptor::push_impl(
 		if (tfdf_header.first_header_offset.value() > tfdz_size)
 		{
 			// Нету. Ну... искать не будем
-			return;
+			_process_stay(tfdz_start, tfdz_end);
 		}
+		else
+		{
+			// А вот если есть - тут по-подробнее
+			const uint8_t * const stray_start = tfdz_start;
+			const uint8_t * const stray_end = tfdz_start + tfdf_header.first_header_offset.value();
+			_process_stay(stray_start, stray_end);
 
-		// А вот если есть - тут по-подробнее
-		const uint8_t * const packet_start = tfdz_start + *tfdf_header.first_header_offset;
-		const uint8_t * const packet_part_end = tfdz_start + tfdz_size;
-		_consume_bytes(packet_start, packet_part_end);
+			const uint8_t * const packet_start = tfdz_start + tfdf_header.first_header_offset.value();
+			const uint8_t * const packet_part_end = tfdz_start + tfdz_size;
+			// кушаем с начала первого пакета, а там разберемся
+			_consume_bytes(packet_start, packet_part_end);
+		}
 	}
 	else
 	{
@@ -99,25 +123,22 @@ void map_packet_acceptor::push_impl(
 		{
 			// Ой, так быть не должно
 			_flush_accum(acceptor_event_map_sdu::INCOMPLETE);
-			return;
+			goto again;
 		}
-
-		if (_prev_frame_seq_no.value() + 1 != params.frame_seq_no.value())
+		else if (_prev_frame_seq_no.value() + 1 != params.frame_seq_no.value())
 		{
 			// Ой. Так тоже быть не должно
 			_flush_accum(acceptor_event_map_sdu::INCOMPLETE);
-			return;
+			goto again;
 		}
-
-		if (_prev_frame_qos != params.qos)
+		else if (_prev_frame_qos != params.qos)
 		{
 			// Ну и так тоже не должно быть
 			_flush_accum(acceptor_event_map_sdu::INCOMPLETE);
-			return;
+			goto again;
 		}
 
-		// Окей, все как должно быть.
-		// Кушаем этот фрейм
+		// Кушаем этот фрейм целиком. а там разберемся
 		_consume_bytes(tfdz_start, tfdz_start + tfdz_size);
 	}
 
@@ -130,7 +151,7 @@ void map_packet_acceptor::_consume_bytes(const uint8_t * begin, const uint8_t * 
 {
 	// Ну, на последовательность все проверяли выше
 	// Поэтому мы просто жрем все байты в наш буфер
-	std::copy (begin, end, std::back_inserter(_accumulator));
+	std::copy(begin, end, std::back_inserter(_accumulator));
 
 	// А теперь пробуем разгрести что нашлось
 	_parse_packets();
@@ -139,7 +160,6 @@ void map_packet_acceptor::_consume_bytes(const uint8_t * begin, const uint8_t * 
 
 void map_packet_acceptor::_parse_packets()
 {
-
 again:
 	if (_accumulator.empty())
 		return; // Ну тут все
@@ -205,6 +225,9 @@ void map_packet_acceptor::_flush_accum(int event_flags)
 
 void map_packet_acceptor::_flush_accum(accum_t::const_iterator flush_zone_end, int event_flags)
 {
+	if (!_accumulator.size())
+		return;
+
 	acceptor_event_map_sdu event;
 	event.channel_id = this->channel_id;
 	event.qos = _prev_frame_qos;
@@ -222,6 +245,24 @@ void map_packet_acceptor::_drop_accum(accum_t::const_iterator drop_zone_end)
 {
 	_accumulator.erase(_accumulator.begin(), drop_zone_end);
 	_current_packet_header.reset();
+}
+
+
+void map_packet_acceptor::_process_stay(const uint8_t * begin, const uint8_t * end)
+{
+	if (!_emit_stray_data)
+		return;
+
+	if (begin == end)
+		return;
+
+	// Если настроен сброс мусорных данных - собственно их и сбросим
+	acceptor_event_map_sdu event;
+	event.channel_id = this->channel_id;
+	event.qos = _prev_frame_qos;
+	event.flags = acceptor_event_map_sdu::MAPP | acceptor_event_map_sdu::STRAY;
+	std::copy(begin, end, std::back_inserter(event.data));
+	emit_event(event);
 }
 
 

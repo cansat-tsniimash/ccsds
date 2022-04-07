@@ -60,7 +60,8 @@ struct acceptor_event_map_sdu: public acceptor_event
 		IDLE			= 0x0002,
 		CORRUPTED		= 0x0004,
 		MAPA			= 0x0008,
-		MAPP			= 0x0010
+		MAPP			= 0x0010,
+		STRAY			= 0x0020,
 	};
 
 	acceptor_event_map_sdu(): acceptor_event(kind_t::MAP_SDU) {}
