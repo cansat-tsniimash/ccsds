@@ -144,6 +144,9 @@ again:
 
 	_prev_frame_qos = params.qos;
 	_prev_frame_seq_no = params.frame_seq_no;
+
+	// А теперь пробуем разгрести что нашлось
+	_parse_packets();
 }
 
 
@@ -152,9 +155,6 @@ void map_packet_acceptor::_consume_bytes(const uint8_t * begin, const uint8_t * 
 	// Ну, на последовательность все проверяли выше
 	// Поэтому мы просто жрем все байты в наш буфер
 	std::copy(begin, end, std::back_inserter(_accumulator));
-
-	// А теперь пробуем разгрести что нашлось
-	_parse_packets();
 }
 
 
